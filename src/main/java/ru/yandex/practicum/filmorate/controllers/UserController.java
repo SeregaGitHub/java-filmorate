@@ -45,8 +45,4 @@ public class UserController {
         }
         return user;
     }
-
-    private static void setUserId(int userId) {
-        UserController.userId = userId;
-    }
 }
