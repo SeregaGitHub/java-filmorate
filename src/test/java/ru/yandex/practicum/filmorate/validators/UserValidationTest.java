@@ -5,6 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.util.ControllerUtil;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -13,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UserValidationTest {
     private User user;
     private UserController userController;
+    private UserService userService;
+    private UserStorage userStorage;
+    private UserValidator userValidator;
+    private ControllerUtil controllerUtil;
 
     @BeforeEach
     void beforeEach() {
@@ -22,14 +30,17 @@ public class UserValidationTest {
 
     @BeforeEach
     void createNewUserController() {
-        userController = new UserController();
+        controllerUtil = new ControllerUtil();
+        userStorage = new InMemoryUserStorage();
+        userValidator = new UserValidator();
+        userService = new UserService(userStorage/*, userValidator*/);
+        userController = new UserController(userService, userValidator, controllerUtil);
     }
 
     @AfterEach
     void clearUserController() {
-        userController.getUsersList().clear();
         try {
-            Field field = UserController.class.getDeclaredField("userId");
+            Field field = UserService.class.getDeclaredField("userId");
             field.setAccessible(true);
             field.set(field, 0);
         } catch (NoSuchFieldException | IllegalAccessException e) {
