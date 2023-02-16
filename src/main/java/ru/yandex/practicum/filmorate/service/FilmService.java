@@ -5,7 +5,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -21,6 +24,10 @@ public class FilmService {
         return filmStorage.getFilmsList();
     }
 
+    public Film getFilm(Integer filmId) {
+        return filmStorage.getFilm(filmId);
+    }
+
     public Film addFilm(Film film) {
         film.setId(++filmId);
         filmStorage.addFilm(film);
@@ -32,19 +39,32 @@ public class FilmService {
         return film;
     }
 
+    public Film deleteFilm(Integer id) {
+        return  filmStorage.deleteFilm(id);
+    }
+
     public void putLike(Integer filmId, Integer userId) {
-        filmStorage.putLike(filmId, userId);
+        Film film = filmStorage.getFilm(filmId);
+        film.getLikes().add(userId);
+        filmStorage.addFilm(film);
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
-        filmStorage.deleteLike(filmId, userId);
+        Film film = filmStorage.getFilm(filmId);
+        film.getLikes().remove(userId);
+        filmStorage.addFilm(film);
     }
 
     public List<Film> getBestFilms(Integer count) {
-        return filmStorage.getBestFilms(count);
-    }
-
-    public Film getFilm(Integer filmId) {
-        return filmStorage.getFilm(filmId);
+        List<Film> filmList = filmStorage.getFilmsList();
+        if (count > filmList.size()) {
+            count = filmList.size();
+        }
+        List<Film> bestFilmList = filmList.stream()
+                                          .sorted(Comparator.comparingInt(v -> v.getLikes().size()))
+                                          .skip(filmList.size() - count)
+                                          .collect(Collectors.toList());
+        Collections.reverse(bestFilmList);
+        return bestFilmList;
     }
 }

@@ -29,6 +29,21 @@ public class FilmController {
         this.controllerUtil = controllerUtil;
     }
 
+    @GetMapping
+    public List<Film> getFilmsList() {
+        return filmService.getFilmsList();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable("id") Integer id) {
+        if (filmService.getFilm(id) == null) {
+            log.warn("Ошибка пользователя: Фильм с id-" + id + " не найден.");
+            throw new FilmNotFoundException("Фильм с id-" + id + " не найден.");
+        } else {
+            return filmService.getFilm(id);
+        }
+    }
+
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         filmValidator.filmValidator(film);
@@ -50,27 +65,23 @@ public class FilmController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteFilm(@PathVariable("id") Integer id) {
+        if (filmService.deleteFilm(id) == null) {
+            log.warn("Ошибка пользователя: Фильм с id-" + id + " не найден.");
+            throw new FilmNotFoundException("Фильм с id-" + id + " не найден.");
+        } else {
+            log.info("Фильм с id-" + id + " удалён.");
+            return "Фильм с id-" + id + " удалён.";
+        }
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public String putLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
         controllerUtil.isFilmAndUserExists(filmService, id, userId);
         filmService.putLike(id, userId);
         log.info("Пользователь с id-" + userId + " поставил лайк фильму с id-" + id + ".");
         return "Пользователь с id-" + userId + " поставил лайк фильму с id-" + id + ".";
-    }
-
-    @GetMapping
-    public List<Film> getFilmsList() {
-        return filmService.getFilmsList();
-    }
-
-    @GetMapping("/{id}")
-    public Film getFilm(@PathVariable("id") Integer id) {
-        if (filmService.getFilm(id) == null) {
-            log.warn("Ошибка пользователя: Фильм с id-" + id + " не найден.");
-            throw new FilmNotFoundException("Фильм с id-" + id + " не найден.");
-        } else {
-            return filmService.getFilm(id);
-        }
     }
 
     @GetMapping("/popular")

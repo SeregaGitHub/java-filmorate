@@ -33,7 +33,7 @@ public class UserValidationTest {
         controllerUtil = new ControllerUtil();
         userStorage = new InMemoryUserStorage();
         userValidator = new UserValidator();
-        userService = new UserService(userStorage/*, userValidator*/);
+        userService = new UserService(userStorage);
         userController = new UserController(userService, userValidator, controllerUtil);
     }
 

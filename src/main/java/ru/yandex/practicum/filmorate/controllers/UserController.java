@@ -31,6 +31,16 @@ public class UserController {
         return userService.getUserList();
     }
 
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable("id") Integer id) {
+        if (userService.getUser(id) == null) {
+            log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
+            throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
+        } else {
+            return userService.getUser(id);
+        }
+    }
+
     @PostMapping
     public User createNewUser(@Valid @RequestBody User user) {
         userValidator.userNameValidation(user);
@@ -52,6 +62,17 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable("id") Integer id) {
+        if (userService.deleteUser(id) == null) {
+            log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
+            throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
+        } else {
+            log.info("Пользователь с id-" + id + " удалён.");
+            return "Пользователь с id-" + id + " удалён.";
+        }
+    }
+
     @PutMapping("/{id}/friends/{friendId}")
     public String addToFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
         controllerUtil.isTwoUsersExists(userService, id, friendId);
@@ -68,16 +89,6 @@ public class UserController {
         userService.getUser(friendId).getFriends().remove(id);
         log.info("Пользователь с id-" + id + " удалил из друзей пользователя с id-" + friendId + ".");
         return "Пользователь с id-" + id + " удалил из друзей пользователя с id-" + friendId + ".";
-    }
-
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable("id") Integer id) {
-        if (userService.getUser(id) == null) {
-            log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
-            throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
-        } else {
-            return userService.getUser(id);
-        }
     }
 
     @GetMapping("/{id}/friends")
