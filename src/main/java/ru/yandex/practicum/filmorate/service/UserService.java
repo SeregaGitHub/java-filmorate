@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,17 +46,17 @@ public class UserService {
     }
 
     public List<User> getAllUserFriends(Integer userId) {
-        return new ArrayList<>(userStorage.getUsersList().stream()
-                                                         .filter(u -> u.getFriends().contains(userId))
-                                                         .collect(Collectors.toList()));
+        return userStorage.getUsersList().stream()
+                                         .filter(u -> u.getFriends().contains(userId))
+                                         .collect(Collectors.toList());
     }
 
     public List<User> getAllCommonFriends(Integer id, Integer otherId) {
         Set<Integer> commonFriends = new HashSet<>(userStorage.getUser(id).getFriends());
         commonFriends.retainAll(userStorage.getUser(otherId).getFriends());
 
-        return new ArrayList<>(userStorage.getUsersList().stream()
-                                                         .filter(user1 -> commonFriends.contains(user1.getId()))
-                                                         .collect(Collectors.toList()));
+        return userStorage.getUsersList().stream()
+                                         .filter(user1 -> commonFriends.contains(user1.getId()))
+                                         .collect(Collectors.toList());
     }
 }
