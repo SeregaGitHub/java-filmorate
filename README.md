@@ -9,7 +9,7 @@
 
 **Схема базы данных приложения**
 
-![db_schema](https://github.com/SeregaGitHub/java-filmorate/raw/add-friends-likes/filmorate.pgn)
+![db_schema](https://github.com/SeregaGitHub/java-filmorate/blob/add-friends-likes/filmorate.png)
 
 Пояснения к схеме базы данных:
 * `Таблица user_filmorate` - модель пользователя.
