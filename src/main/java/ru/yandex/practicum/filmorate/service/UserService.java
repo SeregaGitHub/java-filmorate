@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -14,11 +15,10 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserService {
-    private static int userId = 0;
     UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier ("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -31,13 +31,12 @@ public class UserService {
     }
 
     public User createNewUser(User user) {
-        user.setId(++userId);
-        userStorage.putUser(user);
+        userStorage.addUser(user);
         return user;
     }
 
     public User updateUser(User user) {
-        userStorage.putUser(user);
+        userStorage.updateUser(user);
         return user;
     }
 
@@ -46,9 +45,12 @@ public class UserService {
     }
 
     public List<User> getAllUserFriends(Integer userId) {
+        User user = userStorage.getUser(userId);
+        Set<Integer> userFriendsId = new HashSet<>(user.getFriends());
+
         return userStorage.getUsersList().stream()
-                                         .filter(u -> u.getFriends().contains(userId))
-                                         .collect(Collectors.toList());
+                .filter(u -> userFriendsId.contains(u.getId()))
+                .collect(Collectors.toList());
     }
 
     public List<User> getAllCommonFriends(Integer id, Integer otherId) {
@@ -56,7 +58,7 @@ public class UserService {
         commonFriends.retainAll(userStorage.getUser(otherId).getFriends());
 
         return userStorage.getUsersList().stream()
-                                         .filter(user1 -> commonFriends.contains(user1.getId()))
-                                         .collect(Collectors.toList());
+                .filter(user1 -> commonFriends.contains(user1.getId()))
+                .collect(Collectors.toList());
     }
 }

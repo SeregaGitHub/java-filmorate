@@ -74,19 +74,67 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public String addToFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+    public String addToFriendshipRequests(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
         controllerUtil.isTwoUsersExists(userService, id, friendId);
-        userService.getUser(id).getFriends().add(friendId);
-        userService.getUser(friendId).getFriends().add(id);
-        log.info("Пользователь с id-" + id + " добавил в друзья пользователя с id-" + friendId + ".");
-        return "Пользователь с id-" + id + " добавил в друзья пользователя с id-" + friendId + ".";
+        User user = userService.getUser(id);
+
+        user.getFriends().add(friendId);
+        user.getFriendshipRequests().add(friendId);
+        userService.updateUser(user);
+        log.info("Пользователь с id-" + id + " сделал запрос на дружбу пользователя с id-" + friendId + ".");
+        return "Пользователь с id-" + id + " сделал запрос на дружбу пользователя с id-" + friendId + ".";
+    }
+
+    @PutMapping("/{id}/friends/{friendId}/true")
+    public String addToFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+        User user = userService.getUser(id);
+        if (user == null) {
+            log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
+            throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
+        } else {
+            user.getFriendshipRequests().remove(friendId);
+            userService.updateUser(user);
+            if (userService.getUser(friendId) == null) {
+                log.warn("Ошибка пользователя: Пользователь с id-" + friendId + " не найден.");
+                throw new UserNotFoundException("Пользователь с id-" + friendId + " не найден.");
+            } else {
+                User userFriend = userService.getUser(friendId);
+                userFriend.getFriends().add(id);
+                userService.updateUser(userFriend);
+                log.info("Пользователь с id-" + id + " добавил в друзья пользователя с id-" + friendId + ".");
+                return "Пользователь с id-" + id + " добавил в друзья пользователя с id-" + friendId + ".";
+            }
+        }
+    }
+
+    @PutMapping("/{id}/friends/{friendId}/false")
+    public String refuseFriendship(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
+        User user = userService.getUser(id);
+
+        if (user == null) {
+            log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
+            throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
+        } else {
+            user.getFriendshipRequests().remove(friendId);
+            user.getFriends().remove(friendId);
+            userService.updateUser(user);
+            log.info("Пользователь с id-" + id + " отказал в дружбе пользователю с id-" + friendId + ".");
+            return "Пользователь с id-" + id + " отказал в дружбе пользователю с id-" + friendId + ".";
+        }
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public String deleteFromFriends(@PathVariable("id") Integer id, @PathVariable("friendId") Integer friendId) {
         controllerUtil.isTwoUsersExists(userService, id, friendId);
-        userService.getUser(id).getFriends().remove(friendId);
-        userService.getUser(friendId).getFriends().remove(id);
+        User user = userService.getUser(id);
+        User userFriend = userService.getUser(friendId);
+
+        user.getFriends().remove(friendId);
+        user.getFriendshipRequests().remove(friendId);
+        userFriend.getFriends().remove(id);
+        userFriend.getFriendshipRequests().remove(id);
+        userService.updateUser(user);
+        userService.updateUser(userFriend);
         log.info("Пользователь с id-" + id + " удалил из друзей пользователя с id-" + friendId + ".");
         return "Пользователь с id-" + id + " удалил из друзей пользователя с id-" + friendId + ".";
     }
