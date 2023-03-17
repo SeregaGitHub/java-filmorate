@@ -24,8 +24,12 @@ public class UserValidationTest {
 
     @BeforeEach
     void beforeEach() {
-        user = new User( "serega.kraev1@yandex.ru", "serega_kraev", "Serega"
-                , LocalDate.of(1985, 1,8));
+        user = User.builder()
+                .email("serega.kraev1@yandex.ru")
+                .login("serega_kraev")
+                .name("Serega")
+                .birthday(LocalDate.of(1985, 1,8))
+                .build();
     }
 
     @BeforeEach
@@ -39,12 +43,14 @@ public class UserValidationTest {
 
     @AfterEach
     void clearUserController() {
-        try {
-            Field field = UserService.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(field, 0);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        if (userStorage instanceof InMemoryUserStorage) {
+            try {
+                Field field = InMemoryUserStorage.class.getDeclaredField("userId");
+                field.setAccessible(true);
+                field.set(field, 0);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

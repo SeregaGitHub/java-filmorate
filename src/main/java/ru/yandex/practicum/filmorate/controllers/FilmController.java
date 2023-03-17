@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.util.ControllerUtil;
 import ru.yandex.practicum.filmorate.validators.FilmValidator;
 
 import javax.validation.Valid;
@@ -19,14 +18,11 @@ import java.util.List;
 public class FilmController {
     private final FilmService filmService;
     private final FilmValidator filmValidator;
-    private final ControllerUtil controllerUtil;
-
 
     @Autowired
-    public FilmController(FilmService filmService, FilmValidator filmValidator, ControllerUtil controllerUtil) {
+    public FilmController(FilmService filmService, FilmValidator filmValidator) {
         this.filmService = filmService;
         this.filmValidator = filmValidator;
-        this.controllerUtil = controllerUtil;
     }
 
     @GetMapping
@@ -78,7 +74,6 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public String putLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
-        controllerUtil.isFilmAndUserExists(filmService, id, userId);
         filmService.putLike(id, userId);
         log.info("Пользователь с id-" + userId + " поставил лайк фильму с id-" + id + ".");
         return "Пользователь с id-" + userId + " поставил лайк фильму с id-" + id + ".";
@@ -90,14 +85,13 @@ public class FilmController {
         if (count <= 0) {
             log.warn("Ошибка пользователя: Число " + count + " - некорректно. Оно должно быть положительное.");
             throw new IncorrectParameterException("Число " + count + " - некорректно. " +
-                                                  "Оно должно быть положительное.");
+                    "Оно должно быть положительное.");
         }
         return filmService.getBestFilms(count);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public String deleteLike(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
-        controllerUtil.isFilmAndUserExists(filmService, id, userId);
         log.info("Пользователь с id-" + userId + " удалил лайк у фильма с id-" + id + ".");
         filmService.deleteLike(id, userId);
         return "Пользователь с id-" + userId + " удалил лайк у фильма с id-" + id + ".";

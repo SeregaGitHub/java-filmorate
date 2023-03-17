@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
@@ -27,32 +28,42 @@ public class FilmValidationTest {
     private FilmStorage filmStorage;
     private UserStorage userStorage;
     private ControllerUtil controllerUtil;
+    private Mpa mpa;
 
     @BeforeEach
     void beforeEach() {
-        film = new Film( "Граф Монте-Кристо", "Исторический роман"
-                , LocalDate.of(2002, 8, 1), 120);
-    }
-
-    @BeforeEach
-    void createNewFilmController() {
         controllerUtil = new ControllerUtil();
         userStorage = new InMemoryUserStorage();
         filmValidator = new FilmValidator();
         filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
-        filmController = new FilmController(filmService, filmValidator, controllerUtil);
+        filmService = new FilmService(filmStorage, controllerUtil);
+        filmController = new FilmController(filmService, filmValidator);
+
+        mpa = Mpa.builder()
+                .id(1)
+                .name("G")
+                .build();
+
+        film = Film.builder()
+                .name("Граф Монте-Кристо")
+                .description("Исторический роман")
+                .releaseDate(LocalDate.of(2002, 8, 1))
+                .duration(120)
+                .mpa(mpa)
+                .build();
     }
 
     @AfterEach
     void clearFilmController() {
-        filmController.getFilmsList().clear();
-        try {
-            Field field = FilmService.class.getDeclaredField("filmId");
-            field.setAccessible(true);
-            field.set(field, 0);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        if (filmStorage instanceof InMemoryFilmStorage) {
+            filmController.getFilmsList().clear();
+            try {
+                Field field = InMemoryFilmStorage.class.getDeclaredField("filmId");
+                field.setAccessible(true);
+                field.set(field, 0);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
