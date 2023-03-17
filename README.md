@@ -58,7 +58,7 @@
   GROUP BY film.film_name  
   HAVING COUNT(user_id) > 1;
 ```
-* -- Выбрать друзей пользователя с логином 'VANY' (id=4)
+* -- Выбрать друзей пользователя с логином 'VANYA' (id=4)
 ```
   SELECT user_filmorate.user_login  
   FROM user_filmorate  
