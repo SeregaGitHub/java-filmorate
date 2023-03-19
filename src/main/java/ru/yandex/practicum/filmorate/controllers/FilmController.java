@@ -85,7 +85,7 @@ public class FilmController {
         if (count <= 0) {
             log.warn("Ошибка пользователя: Число " + count + " - некорректно. Оно должно быть положительное.");
             throw new IncorrectParameterException("Число " + count + " - некорректно. " +
-                    "Оно должно быть положительное.");
+                                                  "Оно должно быть положительное.");
         }
         return filmService.getBestFilms(count);
     }

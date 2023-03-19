@@ -33,6 +33,25 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getBestFilms(Integer count) {
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(
+                "SELECT FILM.FILM_ID, FILM_NAME, FILM_DESCRIPTION, FILM_RELEASE_DATE, FILM_DURATION, RATING_ID" +
+                        ", COUNT (LIKES.USER_ID) AS likes_quantity " +
+                        "FROM FILM " +
+                        "LEFT JOIN LIKES USING (FILM_ID) " +
+                        "GROUP BY FILM.FILM_ID " +
+                        "ORDER BY likes_quantity DESC LIMIT ?", count);
+
+        List<Film> films = new ArrayList<>();
+
+        while (rowSet.next()) {
+            Film film = makeFilm(rowSet, rowSet.getInt("FILM_ID"));
+            films.add(film);
+        }
+        return films;
+    }
+
+    @Override
     public Film addFilm(Film film) {
         TreeSet<Genre> filmGenres = film.getGenres();
 
@@ -79,7 +98,6 @@ public class FilmDbStorage implements FilmStorage {
 
         SqlRowSet rowSetRatingName = jdbcTemplate.queryForRowSet(ratingName, film.getMpa().getId());
         if (rowSetRatingName.next()) {
-            //film.getMpa().setId(film.getMpa().getId());
             film.getMpa().setName(Objects.requireNonNull(rowSetRatingName.getString("RATING_NAME")));
         }
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Qualifier("inMemoryFilmStorage")
@@ -19,6 +20,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getFilmsList() {
         return new ArrayList<>(filmHashMap.values());
+    }
+
+    @Override
+    public List<Film> getBestFilms(Integer count) {
+        List<Film> filmList = getFilmsList();
+        if (count > filmList.size()) {
+            count = filmList.size();
+        }
+        List<Film> bestFilmList = filmList.stream()
+                .sorted((a, b) -> Integer.compare(b.getLikes().size(), a.getLikes().size()))
+                .limit(count)
+                .collect(Collectors.toList());
+        return bestFilmList;
     }
 
     @Override

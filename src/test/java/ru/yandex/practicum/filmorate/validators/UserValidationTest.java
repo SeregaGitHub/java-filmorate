@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
 
 import java.lang.reflect.Field;
@@ -19,6 +20,7 @@ public class UserValidationTest {
     private UserController userController;
     private UserService userService;
     private UserStorage userStorage;
+    private FriendsStorage friendsStorage;
     private UserValidator userValidator;
     private ControllerUtil controllerUtil;
 
@@ -37,7 +39,7 @@ public class UserValidationTest {
         controllerUtil = new ControllerUtil();
         userStorage = new InMemoryUserStorage();
         userValidator = new UserValidator();
-        userService = new UserService(userStorage);
+        userService = new UserService(userStorage, friendsStorage);
         userController = new UserController(userService, userValidator, controllerUtil);
     }
 

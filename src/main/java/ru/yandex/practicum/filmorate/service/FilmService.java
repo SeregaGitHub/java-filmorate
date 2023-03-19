@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -62,14 +61,6 @@ public class FilmService {
     }
 
     public List<Film> getBestFilms(Integer count) {
-        List<Film> filmList = filmStorage.getFilmsList();
-        if (count > filmList.size()) {
-            count = filmList.size();
-        }
-        List<Film> bestFilmList = filmList.stream()
-                .sorted((a, b) -> Integer.compare(b.getLikes().size(), a.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
-        return bestFilmList;
+        return filmStorage.getBestFilms(count);
     }
 }

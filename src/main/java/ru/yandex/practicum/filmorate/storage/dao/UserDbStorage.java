@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 
 import java.util.*;
 
@@ -13,9 +14,11 @@ import java.util.*;
 @Qualifier("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final FriendsStorage userUtilDao;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, FriendsStorage userUtilDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userUtilDao = userUtilDao;
     }
 
     @Override
@@ -94,25 +97,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     private Set<Integer> getAllFriendshipRequests(Integer id) {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select * from FRIENDSHIP_REQUESTS where USER_ID = ?", id);
-        Set<Integer> set = new HashSet<>();
-
-        while (rowSet.next()) {
-            Integer requesterId = rowSet.getInt("REQUESTER_ID");
-            set.add(requesterId);
-        }
-        return set;
+        return userUtilDao.getAllFriendshipRequests(id);
     }
 
     private Set<Integer> getAllUserFriends(Integer id) {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select * from USER_FRIENDS where USER_ID = ?", id);
-        Set<Integer> set = new HashSet<>();
-
-        while (rowSet.next()) {
-            Integer friendId = rowSet.getInt("FRIEND_ID");
-            set.add(friendId);
-        }
-        return set;
+        return userUtilDao.getAllUserFriends(id);
     }
 
     private User makeUser(SqlRowSet rowSet, Integer id) {

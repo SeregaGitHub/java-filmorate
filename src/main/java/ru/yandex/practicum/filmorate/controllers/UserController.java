@@ -140,12 +140,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getAllUserFriends(@PathVariable("id") Integer id) {
+    public List<User> getListUserFriends(@PathVariable("id") Integer id) {
         if (userService.getUser(id) == null) {
             log.warn("Ошибка пользователя: Пользователь с id-" + id + " не найден.");
             throw new UserNotFoundException("Пользователь с id-" + id + " не найден.");
         } else {
-            return userService.getAllUserFriends(id);
+            return userService.getListUserFriends(id);
         }
     }
 
