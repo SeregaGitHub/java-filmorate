@@ -62,7 +62,8 @@ public class FriendsDbStorage implements FriendsStorage {
         // Но, как я понял, мне нужно уложиться в один запрос, а не в несколько.
         // Я написал свой вариант - надеюсь он подойдёт.
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM USER_FILMORATE WHERE USER_FILMORATE.USER_ID" +
-                " IN (SELECT FRIEND_ID FROM USER_FRIENDS GROUP BY FRIEND_ID HAVING COUNT (FRIEND_ID) > 1)");
+                " IN (SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID IN (?, ?) " +
+                "GROUP BY FRIEND_ID HAVING COUNT (FRIEND_ID) > 1)", id, otherId);
         List<User> users= new ArrayList<>();
 
         while (rowSet.next()) {
