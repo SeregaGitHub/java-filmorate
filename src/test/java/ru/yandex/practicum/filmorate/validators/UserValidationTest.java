@@ -36,7 +36,7 @@ public class UserValidationTest {
 
     @BeforeEach
     void createNewUserController() {
-        controllerUtil = new ControllerUtil();
+        controllerUtil = new ControllerUtil(userStorage);
         userStorage = new InMemoryUserStorage();
         userValidator = new UserValidator();
         userService = new UserService(userStorage, friendsStorage);

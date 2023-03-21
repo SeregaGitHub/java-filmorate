@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film_util.LikeStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
 
 import java.util.List;
@@ -14,11 +14,14 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final ControllerUtil controllerUtil;
+    private final LikeStorage likeStorage;
 
     @Autowired
-    public FilmService(@Qualifier ("filmDbStorage") FilmStorage filmStorage, ControllerUtil controllerUtil) {
+    public FilmService(@Qualifier ("filmDbStorage") FilmStorage filmStorage, ControllerUtil controllerUtil
+            , LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
         this.controllerUtil = controllerUtil;
+        this.likeStorage = likeStorage;
     }
 
     public List<Film> getFilmsList() {
@@ -45,19 +48,12 @@ public class FilmService {
 
     public void putLike(Integer filmId, Integer userId) {
         controllerUtil.isFilmAndUserExists(filmStorage, filmId, userId);
-        Film film = filmStorage.getFilm(filmId);
-        film.getLikes().add(userId);
-        filmStorage.updateFilm(film);
+        likeStorage.putLike(filmId, userId);
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
         controllerUtil.isFilmAndUserExists(filmStorage, filmId, userId);
-        Film film = filmStorage.getFilm(filmId);
-        boolean checkUserId = film.getLikes().remove(userId);
-        if (!checkUserId) {
-            throw new UserNotFoundException("Пользователь с id-" + userId + " не найден.");
-        }
-        filmStorage.updateFilm(film);
+        likeStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getBestFilms(Integer count) {

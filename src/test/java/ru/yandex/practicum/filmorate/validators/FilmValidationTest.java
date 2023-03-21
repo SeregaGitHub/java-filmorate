@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.film_util.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
@@ -28,15 +29,16 @@ public class FilmValidationTest {
     private FilmStorage filmStorage;
     private UserStorage userStorage;
     private ControllerUtil controllerUtil;
+    private LikeStorage likeStorage;
     private Mpa mpa;
 
     @BeforeEach
     void beforeEach() {
-        controllerUtil = new ControllerUtil();
+        controllerUtil = new ControllerUtil(userStorage);
         userStorage = new InMemoryUserStorage();
         filmValidator = new FilmValidator();
         filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage, controllerUtil);
+        filmService = new FilmService(filmStorage, controllerUtil, likeStorage);
         filmController = new FilmController(filmService, filmValidator);
 
         mpa = Mpa.builder()

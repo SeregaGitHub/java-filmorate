@@ -67,6 +67,7 @@ class FilmorateApplicationTests {
 
 		mpa1 = Mpa.builder()
 				.id(1)
+				.name("G")
 				.build();
 
 		film1 = Film.builder()
@@ -80,6 +81,7 @@ class FilmorateApplicationTests {
 
 		mpa2 = Mpa.builder()
 				.id(2)
+				.name("PG")
 				.build();
 
 		film2 = Film.builder()
@@ -93,6 +95,7 @@ class FilmorateApplicationTests {
 
 		mpa3 = Mpa.builder()
 				.id(3)
+				.name("PG-13")
 				.build();
 
 		film3 = Film.builder()

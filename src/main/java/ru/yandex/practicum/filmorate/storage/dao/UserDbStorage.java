@@ -2,23 +2,27 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.*;
 
 @Component
 @Qualifier("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final FriendsStorage userUtilDao;
+    private final FriendsStorage friendsStorage;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate, FriendsStorage userUtilDao) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userUtilDao = userUtilDao;
+        this.friendsStorage = userUtilDao;
     }
 
     @Override
@@ -45,19 +49,17 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        jdbcTemplate.update("insert into USER_FILMORATE (USER_EMAIL" +
-                        ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)"
-                , user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-
-    // Следующая ниже часть кода нужна только для того, чтобы присвоить айди пользователю, проверяемому в тестах Postman
-        String nextUserId = "select USER_ID as NEXT_USER_ID from USER_FILMORATE where USER_EMAIL = ?";
-
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(nextUserId, user.getEmail());
-        int userId = 1;
-        if (sqlRowSet.next()) {
-            userId = sqlRowSet.getInt("NEXT_USER_ID");
-        }
-        user.setId(userId);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement statement = con.prepareStatement(
+                    "insert into USER_FILMORATE (USER_EMAIL" +
+                            ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)"
+                    , new String[]{"USER_ID"});
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getLogin());
+            statement.setString(3, user.getName());
+            statement.setDate(4, Date.valueOf(user.getBirthday())); return statement;}, keyHolder);
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return user;
     }
 
@@ -97,11 +99,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     private Set<Integer> getAllFriendshipRequests(Integer id) {
-        return userUtilDao.getAllFriendshipRequests(id);
+        return friendsStorage.getAllFriendshipRequests(id);
     }
 
     private Set<Integer> getAllUserFriends(Integer id) {
-        return userUtilDao.getAllUserFriends(id);
+        return friendsStorage.getAllUserFriends(id);
     }
 
     private User makeUser(SqlRowSet rowSet, Integer id) {
