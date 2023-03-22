@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film_util.FilmUtilDao;
 
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
 
 @Component
 @Slf4j
@@ -20,62 +21,54 @@ public class FilmUtilDaoImpl implements FilmUtilDao {
     }
 
     @Override
-    public Optional<Genre> getGenre(String id) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from GENRE where GENRE_ID = ?", id);
-        if (genreRows.next()) {
-            Genre genre = Genre.builder()
-                               .id(genreRows.getInt("GENRE_ID"))
-                               .name(Objects.requireNonNull(genreRows.getString("GENRE_NAME")))
-                               .build();
-            return Optional.of(genre);
-        } else {
-            log.warn("Жанр {} не найден", id);
-            return Optional.empty();
+    public Genre getGenre(String id) {
+        String sql = "select * from GENRE where GENRE_ID = ?";
+        Collection<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs), id);
+        Genre genre = null;
+        if (genres.size() == 1) {
+            genre = genres.stream().findFirst().get();
         }
+        return genre;
     }
 
     @Override
     public Collection<Genre> getAllGenres() {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select * from GENRE ORDER BY GENRE_ID");
-        Collection<Genre> genres = new ArrayList<>();
-
-        while (genreRows.next()) {
-            Genre genre = Genre.builder()
-                               .id(genreRows.getInt("GENRE_ID"))
-                               .name(Objects.requireNonNull(genreRows.getString("GENRE_NAME")))
-                               .build();
-            genres.add(genre);
-        }
+        String sql = "select * from GENRE ORDER BY GENRE_ID";
+        Collection<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
         return genres;
     }
 
+    static Genre makeGenre(ResultSet rs) throws SQLException {
+        Genre genre = Genre.builder()
+                .id(rs.getInt("GENRE_ID"))
+                .name(rs.getString("GENRE_NAME"))
+                .build();
+        return genre;
+    }
+
     @Override
-    public Optional<Mpa> getMpa(String id) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from RATING where RATING_ID = ?", id);
-        if (mpaRows.next()) {
-            Mpa mpa = Mpa.builder()
-                         .id(mpaRows.getInt("RATING_ID"))
-                         .name(Objects.requireNonNull(mpaRows.getString("RATING_NAME")))
-                         .build();
-            return Optional.of(mpa);
-        } else {
-            log.warn("Возрастной рейтинг {} не найден", id);
-            return Optional.empty();
+    public Mpa getMpa(String id) {
+        String sql = "select * from RATING where RATING_ID = ?";
+        Collection<Mpa> mpaCollection = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs), id);
+        Mpa mpa = null;
+        if (mpaCollection.size() == 1) {
+            mpa = mpaCollection.stream().findFirst().get();
         }
+        return mpa;
     }
 
     @Override
     public Collection<Mpa> getAllMpa() {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from RATING ORDER BY RATING_ID");
-        Collection<Mpa> mpaCollection = new ArrayList<>();
-
-        while (mpaRows.next()) {
-            Mpa mpa = Mpa.builder()
-                    .id(mpaRows.getInt("RATING_ID"))
-                    .name(Objects.requireNonNull(mpaRows.getString("RATING_NAME")))
-                    .build();
-            mpaCollection.add(mpa);
-        }
+        String sql = "select * from RATING ORDER BY RATING_ID";
+        Collection<Mpa> mpaCollection = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
         return mpaCollection;
+    }
+
+    static Mpa makeMpa(ResultSet rs) throws SQLException {
+        Mpa mpa = Mpa.builder()
+                .id(rs.getInt("RATING_ID"))
+                .name(rs.getString("RATING_NAME"))
+                .build();
+        return mpa;
     }
 }

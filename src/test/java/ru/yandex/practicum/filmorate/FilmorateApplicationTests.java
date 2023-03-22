@@ -11,12 +11,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film_util.FilmUtilDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film_util.FilmUtilDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -263,13 +262,12 @@ class FilmorateApplicationTests {
 
 	@Test
 	void getGenreWhenGenreNotExists() {
-		assertEquals(filmUtilDao.getGenre("9999"), Optional.empty()
-				, "Жанра с Id: '9999' - не существует.");
+		assertNull(filmUtilDao.getGenre("9999"), "Жанра с Id: '9999' - не существует.");
 	}
 
 	@Test
 	void getGenreWhenGenreExists() {
-		assertEquals(filmUtilDao.getGenre("1"), Optional.of(genre1)
+		assertEquals(filmUtilDao.getGenre("1"), genre1
 				, "Жанра с Id: '1' - существует.");
 	}
 
@@ -280,13 +278,12 @@ class FilmorateApplicationTests {
 
 	@Test
 	void getMpaWhenMpaNotExists() {
-		assertEquals(filmUtilDao.getMpa("9999"), Optional.empty()
-				, "Mpa с Id: '9999' - не существует.");
+		assertNull(filmUtilDao.getMpa("9999"), "Mpa с Id: '9999' - не существует.");
 	}
 
 	@Test
 	void getMpaWhenMpaExists() {
-		assertEquals(filmUtilDao.getMpa("1"), Optional.of(mpa1)
+		assertEquals(filmUtilDao.getMpa("1"), mpa1
 				, "Mpa с Id: '1' - существует.");
 	}
 

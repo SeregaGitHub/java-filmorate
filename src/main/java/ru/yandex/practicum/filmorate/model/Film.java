@@ -7,7 +7,6 @@ import lombok.NonNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Set;
 import java.util.TreeSet;
 
 @Data
@@ -27,5 +26,4 @@ public class Film {
     @NonNull
     private Mpa mpa;
     private TreeSet<Genre> genres;
-    private Set<Integer> likes;
 }

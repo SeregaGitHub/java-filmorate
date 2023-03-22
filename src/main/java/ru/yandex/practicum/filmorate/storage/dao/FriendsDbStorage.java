@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class FriendsDbStorage implements FriendsStorage {
@@ -42,48 +44,21 @@ public class FriendsDbStorage implements FriendsStorage {
 
     @Override
     public List<User> getListUserFriends(Integer userId) {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM USER_FILMORATE WHERE USER_ID IN (" +
-                "SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID = ?)", userId);
-        List<User> users= new ArrayList<>();
-
-        while (rowSet.next()) {
-            User user = makeUser(rowSet, rowSet.getInt("USER_ID"));
-            users.add(user);
-        }
+        String sql = "SELECT * FROM USER_FILMORATE WHERE USER_ID IN (" +
+                "SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID = ?)";
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> UserDbStorage.makeUser(rs), userId);
         return users;
     }
 
     @Override
     public List<User> getAllCommonFriends(Integer id, Integer otherId) {
-        //  "опять грузим много лишних данных, нужно сделать один запрос вида:
-        // select * from USER_FILMORATE u, USER_FRIENDS f, USER_FRIENDS o  where  ..... "
-
-        //   К сожалению, синтаксис этого запроса мне не знаком.
-        // Но, как я понял, мне нужно уложиться в один запрос, а не в несколько.
-        // Я написал свой вариант - надеюсь он подойдёт.
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM USER_FILMORATE WHERE USER_FILMORATE.USER_ID" +
-                " IN (SELECT FRIEND_ID FROM USER_FRIENDS WHERE USER_ID IN (?, ?) " +
-                "GROUP BY FRIEND_ID HAVING COUNT (FRIEND_ID) > 1)", id, otherId);
-        List<User> users= new ArrayList<>();
-
-        while (rowSet.next()) {
-            User user = makeUser(rowSet, rowSet.getInt("USER_ID"));
-            users.add(user);
-        }
-        return users;
-    }
-
-    private User makeUser(SqlRowSet rowSet, Integer id) {
-        User user = User.builder()
-                .id(id)
-                .email(Objects.requireNonNull(rowSet.getString("USER_EMAIL")))
-                .login(Objects.requireNonNull(rowSet.getString("USER_LOGIN")))
-                .name(Objects.requireNonNull(rowSet.getString("USER_NAME")))
-                .birthday(Objects.requireNonNull(rowSet.getDate("USER_BIRTHDAY")).toLocalDate())
-                .friendshipRequests(new HashSet<>(getAllFriendshipRequests(id)))
-                .friends(new HashSet<>(getAllUserFriends(id)))
-                .build();
-        return user;
+        String sql = "select " +
+                "u.USER_ID, USER_EMAIL, USER_LOGIN, USER_NAME, USER_BIRTHDAY, o.FRIEND_ID " +
+                "FROM USER_FILMORATE u, USER_FRIENDS f, USER_FRIENDS o " +
+                "WHERE u.USER_ID = f.FRIEND_ID AND u.USER_ID = o.FRIEND_ID AND " +
+                "f.USER_ID = ? AND o.USER_ID = ?";
+        List<User> userList = jdbcTemplate.query(sql, (rs, rowNum) -> UserDbStorage.makeUser(rs), id, otherId);
+        return userList;
     }
 }
 

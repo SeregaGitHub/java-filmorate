@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film_util.FilmUtilDao;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 public class FilmUtilService {
@@ -18,7 +17,7 @@ public class FilmUtilService {
         this.filmUtilDao = filmUtilDao;
     }
 
-    public Optional<Genre> getGenre(String id) {
+    public Genre getGenre(String id) {
         return filmUtilDao.getGenre(id);
     }
 
@@ -26,7 +25,7 @@ public class FilmUtilService {
         return filmUtilDao.getAllGenres();
     }
 
-    public Optional<Mpa> getMpa(String id) {
+    public Mpa getMpa(String id) {
         return filmUtilDao.getMpa(id);
     }
 

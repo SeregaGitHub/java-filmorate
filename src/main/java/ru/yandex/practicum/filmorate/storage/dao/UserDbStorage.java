@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -12,7 +11,12 @@ import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Component
 @Qualifier("userDbStorage")
@@ -27,24 +31,37 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsersList() {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select * from USER_FILMORATE ORDER BY USER_ID");
-        List<User> users = new ArrayList<>();
+        String sqlUsers = "select * from USER_FILMORATE ORDER BY USER_ID";
+        List<User> users = jdbcTemplate.query(sqlUsers, (rs, rowNum) -> makeUser(rs));
 
-        while (rowSet.next()) {
-            User user = makeUser(rowSet, rowSet.getInt("USER_ID"));
-            users.add(user);
+        for (User u: users) {
+            Set<Integer> userFriends = getAllUserFriends(u.getId());
+            if (!userFriends.isEmpty()) {
+                u.setFriends(userFriends);
+            }
+            Set<Integer> userFriendshipRequesters = getAllFriendshipRequests(u.getId());
+            if (!userFriendshipRequesters.isEmpty()) {
+                u.setFriendshipRequests(userFriendshipRequesters);
+            }
         }
         return users;
     }
 
     @Override
     public User getUser(Integer userId) {
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet("select * from USER_FILMORATE where USER_ID = ?", userId);
+        Set<Integer> userFriends = new HashSet<>(getAllUserFriends(userId));
+        Set<Integer> userFriendshipRequests = new HashSet<>(getAllFriendshipRequests(userId));
+        String sql = "select * from USER_FILMORATE where USER_ID = ?";
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId);
         User user = null;
-        if (rowSet.next()) {
-            user = makeUser(rowSet, userId);
+        if (users.size() == 1) {
+            user = users.stream().findFirst().get();
+            user.setFriends(userFriends);
+            user.setFriendshipRequests(userFriendshipRequests);
+            return user;
+        } else {
+            return user;
         }
-        return user;
     }
 
     @Override
@@ -52,9 +69,9 @@ public class UserDbStorage implements UserStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement statement = con.prepareStatement(
-                    "insert into USER_FILMORATE (USER_EMAIL" +
-                            ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)"
-                    , new String[]{"USER_ID"});
+                "insert into USER_FILMORATE (USER_EMAIL" +
+                        ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)"
+                , new String[]{"USER_ID"});
             statement.setString(1, user.getEmail());
             statement.setString(2, user.getLogin());
             statement.setString(3, user.getName());
@@ -106,15 +123,13 @@ public class UserDbStorage implements UserStorage {
         return friendsStorage.getAllUserFriends(id);
     }
 
-    private User makeUser(SqlRowSet rowSet, Integer id) {
+    static User makeUser(ResultSet rs) throws SQLException {
         User user = User.builder()
-                .id(id)
-                .email(Objects.requireNonNull(rowSet.getString("USER_EMAIL")))
-                .login(Objects.requireNonNull(rowSet.getString("USER_LOGIN")))
-                .name(Objects.requireNonNull(rowSet.getString("USER_NAME")))
-                .birthday(Objects.requireNonNull(rowSet.getDate("USER_BIRTHDAY")).toLocalDate())
-                .friendshipRequests(new HashSet<>(getAllFriendshipRequests(id)))
-                .friends(new HashSet<>(getAllUserFriends(id)))
+                .id(rs.getInt("USER_ID"))
+                .email(Objects.requireNonNull(rs.getString("USER_EMAIL")))
+                .login(Objects.requireNonNull(rs.getString("USER_LOGIN")))
+                .name(Objects.requireNonNull(rs.getString("USER_NAME")))
+                .birthday(Objects.requireNonNull(rs.getDate("USER_BIRTHDAY")).toLocalDate())
                 .build();
         return user;
     }

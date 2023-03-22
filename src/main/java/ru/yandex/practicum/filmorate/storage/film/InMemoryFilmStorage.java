@@ -29,7 +29,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             count = filmList.size();
         }
         List<Film> bestFilmList = filmList.stream()
-                .sorted((a, b) -> Integer.compare(b.getLikes().size(), a.getLikes().size()))
+                //.sorted((a, b) -> Integer.compare(b.getLikes().size(), a.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toList());
         return bestFilmList;

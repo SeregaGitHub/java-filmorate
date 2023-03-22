@@ -26,11 +26,11 @@ public class FilmUtilController {
 
     @GetMapping("/genres/{id}")
     public Genre getGenre(@PathVariable ("id") String id) {
-        if (filmUtilService.getGenre(id).isEmpty()) {
+        if (filmUtilService.getGenre(id) == null) {
             log.warn("Ошибка пользователя: Жанр с id-" + id + " не найден.");
             throw new IncorrectFilmUtilParameterException("Жанр с id-" + id + " не найден.");
         } else {
-            return filmUtilService.getGenre(id).get();
+            return filmUtilService.getGenre(id);
         }
     }
 
@@ -41,11 +41,11 @@ public class FilmUtilController {
 
     @GetMapping("/mpa/{id}")
     public Mpa getMpa(@PathVariable ("id") String id) {
-        if (filmUtilService.getMpa(id).isEmpty()) {
+        if (filmUtilService.getMpa(id) == null) {
             log.warn("Ошибка пользователя: Возрастной рейтинг с id-" + id + " не найден.");
             throw new IncorrectFilmUtilParameterException("Возрастной рейтинг с id-" + id + " не найден.");
         } else {
-            return filmUtilService.getMpa(id).get();
+            return filmUtilService.getMpa(id);
         }
     }
 
