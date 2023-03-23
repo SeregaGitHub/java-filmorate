@@ -15,10 +15,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeSet;
+import java.util.*;
 
 @Component
 @Qualifier("filmDbStorage")
@@ -35,11 +32,16 @@ public class FilmDbStorage implements FilmStorage {
                 "f.FILM_ID, FILM_NAME, FILM_DESCRIPTION, FILM_RELEASE_DATE, FILM_DURATION, m.RATING_ID, RATING_NAME " +
                 "from FILM f, RATING m where f.RATING_ID = m.RATING_ID";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
-        if (!films.isEmpty()) {
-            for (Film f: films) {
-                f.setGenres(getAllFilmGenre(f.getId()));
-            }
-        }
+
+        // Integer count = null;
+
+        // Я использую это значение в параметре метода, чтобы различать методы getFilmsList() и getBestFilms(Integer count).
+        // В getFilmsList() - sql запрос получает все жанры всех фильмов.
+        // А в getBestFilms(Integer count) приходится делать sql запрос с выборкой фильмов
+        // и чтобы не получать всю таблицу FILM_GENRE - запросов в методе setAllGenresToFilms(films, count) два варианта.
+
+        Integer count = null;
+        setAllGenresToFilms(films, count);
         return films;
     }
 
@@ -50,11 +52,7 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILM LEFT JOIN LIKES USING (FILM_ID) JOIN RATING USING (RATING_ID) GROUP BY FILM.FILM_ID " +
                 "ORDER BY likes_quantity DESC LIMIT ?";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
-        if (!films.isEmpty()) {
-            for (Film f: films) {
-                f.setGenres(getAllFilmGenre(f.getId()));
-            }
-        }
+        setAllGenresToFilms(films, count);
         return films;
     }
 
@@ -82,7 +80,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         int filmId = film.getId();
         jdbcTemplate.update("update FILM set FILM_NAME = ?, FILM_DESCRIPTION = ?, FILM_RELEASE_DATE = ?" +
-                ", FILM_DURATION = ?, RATING_ID = ? where FILM_ID = ?", film.getName(), film.getDescription()
+                        ", FILM_DURATION = ?, RATING_ID = ? where FILM_ID = ?", film.getName(), film.getDescription()
                 , film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), filmId);
 
         TreeSet<Genre> filmGenres = film.getGenres();
@@ -143,6 +141,53 @@ public class FilmDbStorage implements FilmStorage {
                 .name(rs.getString("GENRE_NAME"))
                 .build();
         return genre;
+    }
+
+    private void setAllGenresToFilms(List<Film> films, Integer count) {
+        String sqlQuery;
+        if (count == null) {
+            sqlQuery = "select fg.FILM_ID, fg.GENRE_ID, g.GENRE_NAME from FILM_GENRE fg, GENRE g " +
+                    "where fg.GENRE_ID = g.GENRE_ID";
+        } else {
+            // Здесь я получаю набор Id лучших фильмов, чтобы использовать его в sql запросе.
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Film f: films) {
+                stringBuilder.append(f.getId());
+                stringBuilder.append(", ");
+            }
+            stringBuilder.setLength(stringBuilder.length() - 2);
+            String sqlFilmsId = stringBuilder.toString();
+            sqlQuery = "select fg.FILM_ID, fg.GENRE_ID, g.GENRE_NAME " +
+                    "from FILM_GENRE fg, GENRE g where fg.GENRE_ID = g.GENRE_ID AND fg.FILM_ID IN (" + sqlFilmsId + ")";
+        }
+        Map<Integer, List<Genre>> map = new HashMap<>();
+
+        jdbcTemplate.query(sqlQuery, rs -> {
+            Integer fId = rs.getInt("FILM_ID");
+            if (map.containsKey(fId)) {
+                map.get(fId).add(Genre.builder()
+                        .id(rs.getInt("GENRE_ID"))
+                        .name(rs.getString("GENRE_NAME"))
+                        .build());
+            } else {
+                List<Genre> list = new ArrayList<>();
+                list.add(Genre.builder()
+                        .id(rs.getInt("GENRE_ID"))
+                        .name(rs.getString("GENRE_NAME"))
+                        .build());
+                map.put(fId, list);
+            }
+        });
+
+        for (Film f: films) {
+            if (map.containsKey(f.getId())) {
+                TreeSet<Genre> treeSet = new TreeSet<>(map.get(f.getId()));
+                f.setGenres(treeSet);
+            } else {
+                f.setGenres(new TreeSet<>());
+            }
+        }
     }
 
     private void updateFilmGenres(Integer filmId, TreeSet<Genre> genreTreeSet) {
