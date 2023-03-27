@@ -165,28 +165,21 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.query(sqlQuery, rs -> {
             Integer fId = rs.getInt("FILM_ID");
-            if (map.containsKey(fId)) {
-                map.get(fId).add(Genre.builder()
-                        .id(rs.getInt("GENRE_ID"))
-                        .name(rs.getString("GENRE_NAME"))
-                        .build());
-            } else {
-                List<Genre> list = new ArrayList<>();
-                list.add(Genre.builder()
-                        .id(rs.getInt("GENRE_ID"))
-                        .name(rs.getString("GENRE_NAME"))
-                        .build());
-                map.put(fId, list);
-            }
+
+            List<Genre> list = map.computeIfAbsent(fId, k -> new ArrayList<>());
+            list.add(Genre.builder()
+                    .id(rs.getInt("GENRE_ID"))
+                    .name(rs.getString("GENRE_NAME"))
+                    .build());
         });
 
         for (Film f: films) {
-            if (map.containsKey(f.getId())) {
-                TreeSet<Genre> treeSet = new TreeSet<>(map.get(f.getId()));
-                f.setGenres(treeSet);
-            } else {
-                f.setGenres(new TreeSet<>());
+            TreeSet<Genre> treeSet = new TreeSet<>();
+            List<Genre> genreList = map.get(f.getId());
+            if (genreList != null) {
+                treeSet.addAll(genreList);
             }
+            f.setGenres(treeSet);
         }
     }
 
