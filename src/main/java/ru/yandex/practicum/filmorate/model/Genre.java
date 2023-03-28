@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Data
 @Builder
-public class Genre implements Comparable<Genre>{
+public class Genre implements Comparable<Genre> {
     private Integer id;
     @Size(max = 30)
     private String name;
