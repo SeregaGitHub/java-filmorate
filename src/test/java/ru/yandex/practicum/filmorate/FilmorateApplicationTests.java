@@ -129,8 +129,8 @@ class FilmorateApplicationTests {
 		assertEquals("email_1", user.getEmail(), "емэйл пользователя должен быть - 'email_1'.");
 		assertEquals("login_1", user.getLogin(), "логин пользователя должен быть - 'login_1'.");
 		assertEquals("name_1", user.getName(), "имя пользователя должно быть - 'name_1'.");
-		assertEquals(LocalDate.of(1985, 1, 1), user.getBirthday()
-				, "день рождения пользователя должно быть - '1985-01-01'.");
+		assertEquals(LocalDate.of(1985, 1, 1), user.getBirthday(),
+				          "день рождения пользователя должно быть - '1985-01-01'.");
 	}
 
 	@Test
@@ -148,8 +148,8 @@ class FilmorateApplicationTests {
 		assertEquals("email_4", userAdd.getEmail(), "емэйл пользователя должен быть - 'email_4'.");
 		assertEquals("login_4", userAdd.getLogin(), "логин пользователя должен быть - 'login_4'.");
 		assertEquals("name_4", userAdd.getName(), "имя пользователя должно быть - 'name_4'.");
-		assertEquals(LocalDate.of(1985, 4, 4), userAdd.getBirthday()
-				, "день рождения пользователя должно быть - '1985-04-04'.");
+		assertEquals(LocalDate.of(1985, 4, 4), userAdd.getBirthday(),
+				          "день рождения пользователя должно быть - '1985-04-04'.");
 	}
 
 	@Test
@@ -168,8 +168,8 @@ class FilmorateApplicationTests {
 		assertEquals("email_5", userUpdate.getEmail(), "емэйл пользователя должен быть - 'email_5'.");
 		assertEquals("login_5", userUpdate.getLogin(), "логин пользователя должен быть - 'login_5'.");
 		assertEquals("name_5", userUpdate.getName(), "имя пользователя должно быть - 'name_5'.");
-		assertEquals(LocalDate.of(1985, 5, 5), userUpdate.getBirthday()
-				, "день рождения пользователя должно быть - '1985-05-05'.");
+		assertEquals(LocalDate.of(1985, 5, 5), userUpdate.getBirthday(),
+				          "день рождения пользователя должно быть - '1985-05-05'.");
 	}
 
 	@Test
@@ -180,8 +180,8 @@ class FilmorateApplicationTests {
 
 	@Test
 	void getUsersList() {
-		assertEquals(3, userDbStorage.getUsersList().size()
-				, "Количество пользователей должно быть - 3.");
+		assertEquals(3, userDbStorage.getUsersList().size(),
+				       "Количество пользователей должно быть - 3.");
 	}
 
 	@Test
@@ -194,10 +194,10 @@ class FilmorateApplicationTests {
 		Film film = filmDbStorage.getFilm(1);
 		assertEquals(1, film.getId(), "Id фильма должно быть - 1");
 		assertEquals("film_1", film.getName(), "Имя фильма должно быть - 'film_1'.");
-		assertEquals("description_1", film.getDescription()
-				, "Описание фильма должно быть - 'description_1'.");
-		assertEquals(LocalDate.of(2023, 1, 1), film.getReleaseDate()
-				, "Дата релиза фильма должна быть - '2023-01-01'.");
+		assertEquals("description_1", film.getDescription(),
+				      "Описание фильма должно быть - 'description_1'.");
+		assertEquals(LocalDate.of(2023, 1, 1), film.getReleaseDate(),
+				          "Дата релиза фильма должна быть - '2023-01-01'.");
 		assertEquals(111, film.getDuration(), "Продолжительность фильма должна быть - '111'.");
 		assertEquals("G", film.getMpa().getName(), "Mpa фильма должно быть - 'G'.");
 	}
@@ -216,10 +216,10 @@ class FilmorateApplicationTests {
 
 		assertEquals(4, filmAdd.getId(), "Id фильма должно быть - 4");
 		assertEquals("film_4", filmAdd.getName(), "Имя фильма должно быть - 'film_4'.");
-		assertEquals("description_4", filmAdd.getDescription()
-				, "Описание фильма должно быть - 'description_4'.");
-		assertEquals(LocalDate.of(2023, 4, 4), filmAdd.getReleaseDate()
-				, "Дата релиза фильма должна быть - '2023-04-04'.");
+		assertEquals("description_4", filmAdd.getDescription(),
+				      "Описание фильма должно быть - 'description_4'.");
+		assertEquals(LocalDate.of(2023, 4, 4), filmAdd.getReleaseDate(),
+				          "Дата релиза фильма должна быть - '2023-04-04'.");
 		assertEquals(444, filmAdd.getDuration(), "Продолжительность фильма должна быть - '444'.");
 		assertEquals("G", filmAdd.getMpa().getName(), "Mpa фильма должно быть - 'G'.");
 
@@ -240,10 +240,10 @@ class FilmorateApplicationTests {
 
 		assertEquals(1, filmUpdate.getId(), "Id фильма должно быть - 1");
 		assertEquals("film_5", filmUpdate.getName(), "Имя фильма должно быть - 'film_5'.");
-		assertEquals("description_5", filmUpdate.getDescription()
-				, "Описание фильма должно быть - 'description_5'.");
-		assertEquals(LocalDate.of(2023, 5, 5), filmUpdate.getReleaseDate()
-				, "Дата релиза фильма должна быть - '2023-05-05'.");
+		assertEquals("description_5", filmUpdate.getDescription(),
+				      "Описание фильма должно быть - 'description_5'.");
+		assertEquals(LocalDate.of(2023, 5, 5), filmUpdate.getReleaseDate(),
+				          "Дата релиза фильма должна быть - '2023-05-05'.");
 		assertEquals(555, filmUpdate.getDuration(), "Продолжительность фильма должна быть - '555'.");
 		assertEquals("G", filmUpdate.getMpa().getName(), "Mpa фильма должно быть - 'G'.");
 	}
@@ -267,8 +267,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	void getGenreWhenGenreExists() {
-		assertEquals(filmUtilDao.getGenre("1"), genre1
-				, "Жанра с Id: '1' - существует.");
+		assertEquals(filmUtilDao.getGenre("1"), genre1, "Жанра с Id: '1' - существует.");
 	}
 
 	@Test
@@ -283,8 +282,7 @@ class FilmorateApplicationTests {
 
 	@Test
 	void getMpaWhenMpaExists() {
-		assertEquals(filmUtilDao.getMpa("1"), mpa1
-				, "Mpa с Id: '1' - существует.");
+		assertEquals(filmUtilDao.getMpa("1"), mpa1, "Mpa с Id: '1' - существует.");
 	}
 
 	@Test
