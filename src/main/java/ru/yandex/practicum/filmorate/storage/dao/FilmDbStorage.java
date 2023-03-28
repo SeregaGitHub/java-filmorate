@@ -59,7 +59,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> { PreparedStatement statement = con.prepareStatement(
+        jdbcTemplate.update(con -> {
+            PreparedStatement statement = con.prepareStatement(
                 "insert into FILM (FILM_NAME" +
                         ", FILM_DESCRIPTION, FILM_RELEASE_DATE, FILM_DURATION, RATING_ID) values (?, ?, ?, ?, ?)",
                         new String[]{"FILM_ID"});
