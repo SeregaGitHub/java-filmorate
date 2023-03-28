@@ -86,8 +86,8 @@ public class FilmValidationTest {
     @Test
     void shouldBeThrowsValidationExceptionBecauseDurationIsNegative() {
         film.setDuration(-1);
-        ValidationException validationException = assertThrows(ValidationException.class
-                , () -> filmController.addFilm(film));
+        ValidationException validationException = assertThrows(ValidationException.class,
+                                                               () -> filmController.addFilm(film));
         assertTrue(validationException.getMessage()
                 .contentEquals("Продолжительность фильма должна быть положительной !!!"));
     }
@@ -95,8 +95,8 @@ public class FilmValidationTest {
     @Test
     void shouldBeThrowsValidationExceptionBecauseReleaseDateIsWrong() {
         film.setReleaseDate(LocalDate.of(1895, Month.DECEMBER, 27));
-        ValidationException validationException = assertThrows(ValidationException.class
-                , () -> filmController.addFilm(film));
+        ValidationException validationException = assertThrows(ValidationException.class,
+                                                               () -> filmController.addFilm(film));
         assertTrue(validationException.getMessage()
                 .contentEquals("Дата релиза должна быть не раньше 28 декабря 1895 года !!!"));
     }
