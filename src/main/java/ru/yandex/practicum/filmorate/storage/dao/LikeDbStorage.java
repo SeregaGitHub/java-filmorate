@@ -14,13 +14,13 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public void putLike(Integer filmId, Integer userId) {
-        jdbcTemplate.update("MERGE INTO LIKES KEY (FILM_ID, USER_ID) VALUES (?, ?)"
-                , filmId, userId);
+        jdbcTemplate.update("MERGE INTO LIKES KEY (FILM_ID, USER_ID) VALUES (?, ?)",
+                                 filmId, userId);
     }
 
     @Override
     public void deleteLike(Integer filmId, Integer userId) {
-        jdbcTemplate.update("DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?"
-                , filmId, userId);
+        jdbcTemplate.update("DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?",
+                                 filmId, userId);
     }
 }

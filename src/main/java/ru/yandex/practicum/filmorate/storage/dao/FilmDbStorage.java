@@ -59,18 +59,18 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {PreparedStatement statement = con.prepareStatement(
+        jdbcTemplate.update(con -> { PreparedStatement statement = con.prepareStatement(
                 "insert into FILM (FILM_NAME" +
-                        ", FILM_DESCRIPTION, FILM_RELEASE_DATE, FILM_DURATION, RATING_ID) values (?, ?, ?, ?, ?)"
-                , new String[]{"FILM_ID"});
+                        ", FILM_DESCRIPTION, FILM_RELEASE_DATE, FILM_DURATION, RATING_ID) values (?, ?, ?, ?, ?)",
+                        new String[]{"FILM_ID"});
             statement.setString(1, film.getName());
             statement.setString(2, film.getDescription());
             statement.setDate(3, Date.valueOf(film.getReleaseDate()));
             statement.setInt(4, film.getDuration());
-            statement.setInt(5, film.getMpa().getId()); return statement;}, keyHolder);
+            statement.setInt(5, film.getMpa().getId()); return statement; }, keyHolder);
 
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-        if (film.getGenres() !=null) {
+        if (film.getGenres() != null) {
             updateFilmGenres(film.getId(), film.getGenres());
         }
         return film;
@@ -80,8 +80,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         int filmId = film.getId();
         jdbcTemplate.update("update FILM set FILM_NAME = ?, FILM_DESCRIPTION = ?, FILM_RELEASE_DATE = ?" +
-                        ", FILM_DURATION = ?, RATING_ID = ? where FILM_ID = ?", film.getName(), film.getDescription()
-                , film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), filmId);
+                        ", FILM_DURATION = ?, RATING_ID = ? where FILM_ID = ?", film.getName(), film.getDescription(),
+                        film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), filmId);
 
         TreeSet<Genre> filmGenres = film.getGenres();
         if (filmGenres != null) {
@@ -185,8 +185,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private void updateFilmGenres(Integer filmId, TreeSet<Genre> genreTreeSet) {
         final List<Genre> genres = new ArrayList<>(genreTreeSet);
-        jdbcTemplate.batchUpdate("MERGE INTO FILM_GENRE KEY (FILM_ID, GENRE_ID) VALUES (?, ?)"
-                , new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate("MERGE INTO FILM_GENRE KEY (FILM_ID, GENRE_ID) VALUES (?, ?)",
+                new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         ps.setInt(1, filmId);

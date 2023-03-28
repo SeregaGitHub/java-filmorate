@@ -70,12 +70,12 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(con -> {
             PreparedStatement statement = con.prepareStatement(
                 "insert into USER_FILMORATE (USER_EMAIL" +
-                        ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)"
-                , new String[]{"USER_ID"});
+                        ", USER_LOGIN, USER_NAME, USER_BIRTHDAY) values (?, ?, ?, ?)",
+                         new String[]{"USER_ID"});
             statement.setString(1, user.getEmail());
             statement.setString(2, user.getLogin());
             statement.setString(3, user.getName());
-            statement.setDate(4, Date.valueOf(user.getBirthday())); return statement;}, keyHolder);
+            statement.setDate(4, Date.valueOf(user.getBirthday())); return statement; }, keyHolder);
         user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return user;
     }
@@ -84,8 +84,8 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         int userId = user.getId();
         jdbcTemplate.update("update USER_FILMORATE set USER_EMAIL = ?, USER_LOGIN = ?, USER_NAME = ?" +
-                        ", USER_BIRTHDAY = ? where USER_ID = ?"
-                , user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), userId);
+                        ", USER_BIRTHDAY = ? where USER_ID = ?",
+                        user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), userId);
 
         Set<Integer> friendshipRequests = user.getFriendshipRequests();
         Set<Integer> friends = user.getFriends();
@@ -95,14 +95,14 @@ public class UserDbStorage implements UserStorage {
 
         if (friendshipRequests != null) {
             for (Integer i : friendshipRequests) {
-                jdbcTemplate.update("MERGE INTO FRIENDSHIP_REQUESTS KEY (USER_ID, REQUESTER_ID) VALUES (?, ?)"
-                        , userId, i);
+                jdbcTemplate.update("MERGE INTO FRIENDSHIP_REQUESTS KEY (USER_ID, REQUESTER_ID) VALUES (?, ?)",
+                                        userId, i);
             }
         }
         if (friends != null) {
             for (Integer i : friends) {
-                jdbcTemplate.update("MERGE INTO USER_FRIENDS KEY (USER_ID, FRIEND_ID) VALUES (?, ?)"
-                        , userId, i);
+                jdbcTemplate.update("MERGE INTO USER_FRIENDS KEY (USER_ID, FRIEND_ID) VALUES (?, ?)",
+                                        userId, i);
             }
         }
         return getUser(userId);
