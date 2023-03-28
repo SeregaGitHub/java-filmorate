@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
 
 import java.lang.reflect.Field;
@@ -19,32 +20,39 @@ public class UserValidationTest {
     private UserController userController;
     private UserService userService;
     private UserStorage userStorage;
+    private FriendsStorage friendsStorage;
     private UserValidator userValidator;
     private ControllerUtil controllerUtil;
 
     @BeforeEach
     void beforeEach() {
-        user = new User( "serega.kraev1@yandex.ru", "serega_kraev", "Serega"
-                , LocalDate.of(1985, 1,8));
+        user = User.builder()
+                .email("serega.kraev1@yandex.ru")
+                .login("serega_kraev")
+                .name("Serega")
+                .birthday(LocalDate.of(1985, 1,8))
+                .build();
     }
 
     @BeforeEach
     void createNewUserController() {
-        controllerUtil = new ControllerUtil();
+        controllerUtil = new ControllerUtil(userStorage);
         userStorage = new InMemoryUserStorage();
         userValidator = new UserValidator();
-        userService = new UserService(userStorage);
+        userService = new UserService(userStorage, friendsStorage);
         userController = new UserController(userService, userValidator, controllerUtil);
     }
 
     @AfterEach
     void clearUserController() {
-        try {
-            Field field = UserService.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(field, 0);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        if (userStorage instanceof InMemoryUserStorage) {
+            try {
+                Field field = InMemoryUserStorage.class.getDeclaredField("userId");
+                field.setAccessible(true);
+                field.set(field, 0);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

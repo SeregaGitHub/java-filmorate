@@ -6,7 +6,14 @@ import java.util.List;
 
 public interface FilmStorage {
     List<Film> getFilmsList();
-    void addFilm(Film film);
+
+    List<Film> getBestFilms(Integer count);
+
+    Film addFilm(Film film);
+
+    Film updateFilm(Film film);
+
     Film getFilm(Integer id);
+
     Film deleteFilm(Integer id);
 }

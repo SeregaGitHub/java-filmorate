@@ -5,16 +5,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.*;
 
 import java.util.Map;
 
 @RestControllerAdvice
 public class ErrorHandler {
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleNegativeFilmValidation(ValidationException exception) {
@@ -52,6 +48,14 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleIncorrectFilmControllerParameter(IncorrectParameterException exception) {
+        return Map.of(
+                "errorMessage - ", exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleIncorrectFilmUtilControllerParameter(IncorrectFilmUtilParameterException exception) {
         return Map.of(
                 "errorMessage - ", exception.getMessage()
         );

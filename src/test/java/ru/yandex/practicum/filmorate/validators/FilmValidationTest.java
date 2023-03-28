@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.film_util.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ControllerUtil;
@@ -27,32 +29,43 @@ public class FilmValidationTest {
     private FilmStorage filmStorage;
     private UserStorage userStorage;
     private ControllerUtil controllerUtil;
+    private LikeStorage likeStorage;
+    private Mpa mpa;
 
     @BeforeEach
     void beforeEach() {
-        film = new Film( "Граф Монте-Кристо", "Исторический роман"
-                , LocalDate.of(2002, 8, 1), 120);
-    }
-
-    @BeforeEach
-    void createNewFilmController() {
-        controllerUtil = new ControllerUtil();
+        controllerUtil = new ControllerUtil(userStorage);
         userStorage = new InMemoryUserStorage();
         filmValidator = new FilmValidator();
         filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
-        filmController = new FilmController(filmService, filmValidator, controllerUtil);
+        filmService = new FilmService(filmStorage, controllerUtil, likeStorage);
+        filmController = new FilmController(filmService, filmValidator);
+
+        mpa = Mpa.builder()
+                .id(1)
+                .name("G")
+                .build();
+
+        film = Film.builder()
+                .name("Граф Монте-Кристо")
+                .description("Исторический роман")
+                .releaseDate(LocalDate.of(2002, 8, 1))
+                .duration(120)
+                .mpa(mpa)
+                .build();
     }
 
     @AfterEach
     void clearFilmController() {
-        filmController.getFilmsList().clear();
-        try {
-            Field field = FilmService.class.getDeclaredField("filmId");
-            field.setAccessible(true);
-            field.set(field, 0);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        if (filmStorage instanceof InMemoryFilmStorage) {
+            filmController.getFilmsList().clear();
+            try {
+                Field field = InMemoryFilmStorage.class.getDeclaredField("filmId");
+                field.setAccessible(true);
+                field.set(field, 0);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -73,8 +86,8 @@ public class FilmValidationTest {
     @Test
     void shouldBeThrowsValidationExceptionBecauseDurationIsNegative() {
         film.setDuration(-1);
-        ValidationException validationException = assertThrows(ValidationException.class
-                , () -> filmController.addFilm(film));
+        ValidationException validationException = assertThrows(ValidationException.class,
+                                                               () -> filmController.addFilm(film));
         assertTrue(validationException.getMessage()
                 .contentEquals("Продолжительность фильма должна быть положительной !!!"));
     }
@@ -82,8 +95,8 @@ public class FilmValidationTest {
     @Test
     void shouldBeThrowsValidationExceptionBecauseReleaseDateIsWrong() {
         film.setReleaseDate(LocalDate.of(1895, Month.DECEMBER, 27));
-        ValidationException validationException = assertThrows(ValidationException.class
-                , () -> filmController.addFilm(film));
+        ValidationException validationException = assertThrows(ValidationException.class,
+                                                               () -> filmController.addFilm(film));
         assertTrue(validationException.getMessage()
                 .contentEquals("Дата релиза должна быть не раньше 28 декабря 1895 года !!!"));
     }

@@ -2,24 +2,24 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user_util.FriendsStorage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-    private static int userId = 0;
     UserStorage userStorage;
+    FriendsStorage friendsStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier ("userDbStorage") UserStorage userStorage, FriendsStorage friendsStorage) {
         this.userStorage = userStorage;
+        this.friendsStorage = friendsStorage;
     }
 
     public List<User> getUserList() {
@@ -31,13 +31,12 @@ public class UserService {
     }
 
     public User createNewUser(User user) {
-        user.setId(++userId);
-        userStorage.putUser(user);
+        userStorage.addUser(user);
         return user;
     }
 
     public User updateUser(User user) {
-        userStorage.putUser(user);
+        userStorage.updateUser(user);
         return user;
     }
 
@@ -45,18 +44,11 @@ public class UserService {
         return userStorage.deleteUser(id);
     }
 
-    public List<User> getAllUserFriends(Integer userId) {
-        return userStorage.getUsersList().stream()
-                                         .filter(u -> u.getFriends().contains(userId))
-                                         .collect(Collectors.toList());
+    public List<User> getListUserFriends(Integer userId) {
+        return friendsStorage.getListUserFriends(userId);
     }
 
     public List<User> getAllCommonFriends(Integer id, Integer otherId) {
-        Set<Integer> commonFriends = new HashSet<>(userStorage.getUser(id).getFriends());
-        commonFriends.retainAll(userStorage.getUser(otherId).getFriends());
-
-        return userStorage.getUsersList().stream()
-                                         .filter(user1 -> commonFriends.contains(user1.getId()))
-                                         .collect(Collectors.toList());
+        return friendsStorage.getAllCommonFriends(id, otherId);
     }
 }
