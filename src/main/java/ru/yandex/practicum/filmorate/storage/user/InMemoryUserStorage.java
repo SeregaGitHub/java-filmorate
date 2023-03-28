@@ -12,7 +12,7 @@ public class InMemoryUserStorage implements UserStorage {
     private static int userId = 0;
     private final HashMap<Integer, User> userHashMap = new HashMap<>();
     // userIdSet + isUserExists(): необходимы для проверки существования пользователя при попытке поставить лайк фильму.
-    private final static Set<Integer> userIdSet = new HashSet<>();
+    private static final Set<Integer> userIdSet = new HashSet<>();
 
     public static boolean isUserExists(Integer userId) {
         return userIdSet.contains(userId);
