@@ -17,8 +17,8 @@ public class FilmService {
     private final LikeStorage likeStorage;
 
     @Autowired
-    public FilmService(@Qualifier ("filmDbStorage") FilmStorage filmStorage, ControllerUtil controllerUtil
-            , LikeStorage likeStorage) {
+    public FilmService(@Qualifier ("filmDbStorage") FilmStorage filmStorage, ControllerUtil controllerUtil,
+                                                    LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
         this.controllerUtil = controllerUtil;
         this.likeStorage = likeStorage;
