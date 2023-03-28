@@ -19,6 +19,7 @@ public class UserController {
     private final UserService userService;
     private final UserValidator userValidator;
     private final ControllerUtil controllerUtil;
+
     @Autowired
     public UserController(UserService userService, UserValidator userValidator, ControllerUtil controllerUtil) {
         this.userService = userService;
