@@ -7,7 +7,10 @@ import java.util.Set;
 
 public interface FriendsStorage {
     Set<Integer> getAllFriendshipRequests(Integer id);
+
     Set<Integer> getAllUserFriends(Integer id);
+
     List<User> getListUserFriends(Integer userId);
+
     List<User> getAllCommonFriends(Integer id, Integer otherId);
 }

@@ -7,7 +7,10 @@ import java.util.Collection;
 
 public interface FilmUtilDao {
     Genre getGenre(String id);
+
     Collection<Genre> getAllGenres();
+
     Mpa getMpa(String id);
+
     Collection<Mpa> getAllMpa();
 }
